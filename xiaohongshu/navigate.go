@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/go-rod/rod"
+	"github.com/pkg/errors"
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 type NavigateAction struct {
@@ -35,8 +37,11 @@ func (n *NavigateAction) ToProfilePage(ctx context.Context) error {
 	page.MustWaitStable()
 
 	// Find and click the "我" channel link in sidebar
+	h := human.New()
 	profileLink := page.MustElement(`div.main-container li.user.side-bar-component a.link-wrapper span.channel`)
-	profileLink.MustClick()
+	if err := h.HumanClick(profileLink); err != nil {
+		return errors.Wrap(err, "点击个人主页链接失败")
+	}
 
 	// Wait for navigation to complete
 	page.MustWaitLoad()
