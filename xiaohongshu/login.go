@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/pkg/errors"
+
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 type LoginAction struct {
@@ -20,7 +22,8 @@ func (a *LoginAction) CheckLoginStatus(ctx context.Context) (bool, error) {
 	pp := a.page.Context(ctx)
 	pp.MustNavigate("https://www.xiaohongshu.com/explore").MustWaitLoad()
 
-	time.Sleep(1 * time.Second)
+	h := human.New()
+	h.Sleep()
 
 	exists, _, err := pp.Has(`.main-container .user .link-wrapper .channel`)
 	if err != nil {
@@ -41,7 +44,8 @@ func (a *LoginAction) Login(ctx context.Context) error {
 	pp.MustNavigate("https://www.xiaohongshu.com/explore").MustWaitLoad()
 
 	// 等待一小段时间让页面完全加载
-	time.Sleep(2 * time.Second)
+	h := human.New()
+	h.Sleep()
 
 	// 检查是否已经登录
 	if exists, _, _ := pp.Has(".main-container .user .link-wrapper .channel"); exists {
@@ -63,7 +67,8 @@ func (a *LoginAction) FetchQrcodeImage(ctx context.Context) (string, bool, error
 	pp.MustNavigate("https://www.xiaohongshu.com/explore").MustWaitLoad()
 
 	// 等待一小段时间让页面完全加载
-	time.Sleep(2 * time.Second)
+	h := human.New()
+	h.Sleep()
 
 	// 检查是否已经登录
 	if exists, _, _ := pp.Has(".main-container .user .link-wrapper .channel"); exists {
