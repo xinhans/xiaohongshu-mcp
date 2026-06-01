@@ -504,9 +504,7 @@ func clickPublishWidget(h *human.Config, page *rod.Page, widget *rod.Element) er
 
 	x := minX + (maxX-minX)*0.65
 	y := minY + (maxY-minY)/2
-	if err := page.Mouse.MoveTo(proto.Point{X: x, Y: y}); err != nil {
-		return errors.Wrap(err, "移动到新版发布按钮失败")
-	}
+	h.HumanMoveTo(page, x, y)
 	if err := page.Mouse.Click(proto.InputMouseButtonLeft, 1); err != nil {
 		return errors.Wrap(err, "点击发布按钮失败")
 	}
