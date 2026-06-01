@@ -40,6 +40,7 @@ const (
 func NewPublishImageAction(page *rod.Page) (*PublishAction, error) {
 
 	pp := page.Timeout(300 * time.Second)
+	h := human.New()
 
 	// 使用更稳健的导航和等待策略
 	if err := pp.Navigate(urlOfPublic); err != nil {
@@ -50,20 +51,20 @@ func NewPublishImageAction(page *rod.Page) (*PublishAction, error) {
 	if err := pp.WaitLoad(); err != nil {
 		logrus.Warnf("等待页面加载出现问题: %v，继续尝试", err)
 	}
-	time.Sleep(2 * time.Second)
+	h.Sleep()
 
 	// 等待页面稳定
 	if err := pp.WaitDOMStable(time.Second, 0.1); err != nil {
 		logrus.Warnf("等待 DOM 稳定出现问题: %v，继续尝试", err)
 	}
-	time.Sleep(1 * time.Second)
+	h.Sleep()
 
 	if err := mustClickPublishTab(pp, "上传图文"); err != nil {
 		logrus.Errorf("点击上传图文 TAB 失败: %v", err)
 		return nil, err
 	}
 
-	time.Sleep(1 * time.Second)
+	h.Sleep()
 
 	return &PublishAction{
 		page: pp,
@@ -204,6 +205,8 @@ func isElementBlocked(elem *rod.Element) (bool, error) {
 }
 
 func uploadImages(page *rod.Page, imagesPaths []string) error {
+	h := human.New()
+
 	// 验证文件路径有效性
 	validPaths := make([]string, 0, len(imagesPaths))
 	for _, path := range imagesPaths {
@@ -236,7 +239,7 @@ func uploadImages(page *rod.Page, imagesPaths []string) error {
 		if err := waitForUploadComplete(page, i+1); err != nil {
 			return errors.Wrapf(err, "第%d张图片上传超时", i+1)
 		}
-		time.Sleep(1 * time.Second)
+		h.Sleep()
 	}
 
 	return nil
@@ -650,7 +653,7 @@ func inputTag(h *human.Config, contentElem *rod.Element, tag string) error {
 		time.Sleep(50 * time.Millisecond)
 	}
 
-	time.Sleep(1 * time.Second)
+	h.Sleep()
 
 	page := contentElem.Page()
 	topicContainer, err := page.Element("#creator-editor-topic-container")
@@ -669,7 +672,7 @@ func inputTag(h *human.Config, contentElem *rod.Element, tag string) error {
 		return errors.Wrap(err, "点击标签联想选项失败")
 	}
 	slog.Info("成功点击标签联想选项", "tag", tag)
-	time.Sleep(200 * time.Millisecond)
+	h.Sleep()
 
 	h.Sleep() // 等待标签处理完成
 	return nil
@@ -832,7 +835,7 @@ func setVisibility(h *human.Config, page *rod.Page, visibility string) error {
 				return errors.Wrap(err, "选择可见范围失败")
 			}
 			slog.Info("已设置可见范围", "visibility", visibility)
-			time.Sleep(200 * time.Millisecond)
+			h.Sleep()
 			return nil
 		}
 	}
@@ -1129,7 +1132,7 @@ func clickAddProductButton(h *human.Config, page *rod.Page) error {
 						return errors.Wrap(err, "点击添加商品按钮失败")
 					}
 					slog.Info("已点击添加商品按钮")
-					time.Sleep(300 * time.Millisecond) // 确保弹窗动画开始
+					h.Sleep()
 					return nil
 				}
 
@@ -1139,7 +1142,7 @@ func clickAddProductButton(h *human.Config, page *rod.Page) error {
 						return errors.Wrap(err, "点击添加商品按钮失败")
 					}
 					slog.Info("已点击添加商品按钮")
-					time.Sleep(300 * time.Millisecond) // 确保弹窗动画开始
+					h.Sleep()
 					return nil
 				}
 			}
