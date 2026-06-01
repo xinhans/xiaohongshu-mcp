@@ -9,6 +9,8 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 // PublishVideoContent 发布视频内容
@@ -100,6 +102,12 @@ func uploadVideo(page *rod.Page, videoPath string) error {
 
 // submitPublishVideo 填写标题、正文、标签并点击发布（等待按钮可点击后再提交）
 func submitPublishVideo(page *rod.Page, title, content string, tags []string, scheduleTime *time.Time, visibility string, products []string) error {
+	// 创建 human.Config 实例
+	h := human.New()
+	if level := os.Getenv("XHS_HUMAN_LEVEL"); level != "" {
+		h.SetAggression(level)
+	}
+
 	// 标题
 	titleElem, err := page.Element("div.d-input input")
 	if err != nil {
@@ -118,10 +126,10 @@ func submitPublishVideo(page *rod.Page, title, content string, tags []string, sc
 	if err := contentElem.Input(content); err != nil {
 		return errors.Wrap(err, "输入正文失败")
 	}
-	if err := waitAndClickTitleInput(titleElem); err != nil {
+	if err := waitAndClickTitleInput(h, titleElem); err != nil {
 		return err
 	}
-	if err := inputTags(contentElem, tags); err != nil {
+	if err := inputTags(h, contentElem, tags); err != nil {
 		return err
 	}
 
@@ -129,23 +137,23 @@ func submitPublishVideo(page *rod.Page, title, content string, tags []string, sc
 
 	// 处理定时发布
 	if scheduleTime != nil {
-		if err := setSchedulePublish(page, *scheduleTime); err != nil {
+		if err := setSchedulePublish(h, page, *scheduleTime); err != nil {
 			return errors.Wrap(err, "设置定时发布失败")
 		}
 		slog.Info("定时发布设置完成", "schedule_time", scheduleTime.Format("2006-01-02 15:04"))
 	}
 
 	// 设置可见范围
-	if err := setVisibility(page, visibility); err != nil {
+	if err := setVisibility(h, page, visibility); err != nil {
 		return errors.Wrap(err, "设置可见范围失败")
 	}
 
 	// 绑定商品
-	if err := bindProducts(page, products); err != nil {
+	if err := bindProducts(h, page, products); err != nil {
 		return errors.Wrap(err, "绑定商品失败")
 	}
 
-	if err := clickPublishButton(page); err != nil {
+	if err := clickPublishButton(h, page); err != nil {
 		return err
 	}
 
