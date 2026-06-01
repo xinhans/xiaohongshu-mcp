@@ -113,12 +113,15 @@ func removePopCover(page *rod.Page) {
 }
 
 func clickEmptyPosition(page *rod.Page) {
+	h := human.New()
 	x := 380 + rand.Intn(100)
 	y := 20 + rand.Intn(60)
-	page.Mouse.MustMoveTo(float64(x), float64(y)).MustClick(proto.InputMouseButtonLeft)
+	h.HumanMoveTo(page, float64(x), float64(y))
+	page.Mouse.Click(proto.InputMouseButtonLeft, 1)
 }
 
 func mustClickPublishTab(page *rod.Page, tabname string) error {
+	h := human.New()
 	page.MustElement(`div.upload-content`).MustWaitVisible()
 
 	deadline := time.Now().Add(15 * time.Second)
@@ -142,7 +145,7 @@ func mustClickPublishTab(page *rod.Page, tabname string) error {
 			continue
 		}
 
-		if err := tab.Click(proto.InputMouseButtonLeft, 1); err != nil {
+		if err := h.HumanClick(tab); err != nil {
 			logrus.Warnf("点击发布 TAB 失败: %v", err)
 			time.Sleep(200 * time.Millisecond)
 			continue
@@ -518,7 +521,7 @@ func clickPublishWidget(h *human.Config, page *rod.Page, widget *rod.Element) er
 func waitAndClickTitleInput(h *human.Config, titleElem *rod.Element) error {
 	slog.Info("正文填写完成，准备等待后回点标题输入框")
 	h.Sleep()
-	if err := titleElem.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(titleElem); err != nil {
 		return errors.Wrap(err, "回点标题输入框失败")
 	}
 	slog.Info("已回点标题输入框，继续后续发布流程")
@@ -668,7 +671,7 @@ func inputTag(h *human.Config, contentElem *rod.Element, tag string) error {
 		return contentElem.Input(" ")
 	}
 
-	if err := firstItem.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(firstItem); err != nil {
 		return errors.Wrap(err, "点击标签联想选项失败")
 	}
 	slog.Info("成功点击标签联想选项", "tag", tag)
@@ -815,7 +818,7 @@ func setVisibility(h *human.Config, page *rod.Page, visibility string) error {
 	if err != nil {
 		return errors.Wrap(err, "查找可见范围下拉框失败")
 	}
-	if err := dropdown.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(dropdown); err != nil {
 		return errors.Wrap(err, "点击可见范围下拉框失败")
 	}
 	h.Sleep()
@@ -831,7 +834,7 @@ func setVisibility(h *human.Config, page *rod.Page, visibility string) error {
 			continue
 		}
 		if strings.Contains(text, visibility) {
-			if err := opt.Click(proto.InputMouseButtonLeft, 1); err != nil {
+			if err := h.HumanClick(opt); err != nil {
 				return errors.Wrap(err, "选择可见范围失败")
 			}
 			slog.Info("已设置可见范围", "visibility", visibility)
@@ -845,7 +848,7 @@ func setVisibility(h *human.Config, page *rod.Page, visibility string) error {
 // setSchedulePublish 设置定时发布时间
 func setSchedulePublish(h *human.Config, page *rod.Page, t time.Time) error {
 	// 1. 点击定时发布开关
-	if err := clickScheduleSwitch(page); err != nil {
+	if err := clickScheduleSwitch(h, page); err != nil {
 		return err
 	}
 	h.Sleep()
@@ -860,13 +863,13 @@ func setSchedulePublish(h *human.Config, page *rod.Page, t time.Time) error {
 }
 
 // clickScheduleSwitch 点击定时发布开关
-func clickScheduleSwitch(page *rod.Page) error {
+func clickScheduleSwitch(h *human.Config, page *rod.Page) error {
 	switchElem, err := page.Element(".post-time-wrapper .d-switch")
 	if err != nil {
 		return errors.Wrap(err, "查找定时发布开关失败")
 	}
 
-	if err := switchElem.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(switchElem); err != nil {
 		return errors.Wrap(err, "点击定时发布开关失败")
 	}
 	slog.Info("已点击定时发布开关")
@@ -937,7 +940,7 @@ func setOriginal(h *human.Config, page *rod.Page) error {
 		}
 
 		// 点击开关
-		if err := switchElem.Click(proto.InputMouseButtonLeft, 1); err != nil {
+		if err := h.HumanClick(switchElem); err != nil {
 			return errors.Wrap(err, "点击原创声明开关失败")
 		}
 
@@ -1073,7 +1076,7 @@ func bindProducts(h *human.Config, page *rod.Page, products []string) error {
 
 	// 点击保存按钮
 	slog.Info("准备点击保存按钮")
-	if err := clickModalSaveButton(page, modal); err != nil {
+	if err := clickModalSaveButton(h, page, modal); err != nil {
 		return errors.Wrap(err, "点击保存按钮失败")
 	}
 	slog.Info("保存按钮点击完成，开始等待弹窗关闭")
@@ -1128,7 +1131,7 @@ func clickAddProductButton(h *human.Config, page *rod.Page) error {
 
 				// 检查是否为 button 或含 d-button class
 				if tag == "button" {
-					if err := parent.Click(proto.InputMouseButtonLeft, 1); err != nil {
+					if err := h.HumanClick(parent); err != nil {
 						return errors.Wrap(err, "点击添加商品按钮失败")
 					}
 					slog.Info("已点击添加商品按钮")
@@ -1138,7 +1141,7 @@ func clickAddProductButton(h *human.Config, page *rod.Page) error {
 
 				cls, _ := parent.Attribute("class")
 				if cls != nil && strings.Contains(*cls, "d-button") {
-					if err := parent.Click(proto.InputMouseButtonLeft, 1); err != nil {
+					if err := h.HumanClick(parent); err != nil {
 						return errors.Wrap(err, "点击添加商品按钮失败")
 					}
 					slog.Info("已点击添加商品按钮")
@@ -1241,7 +1244,7 @@ func searchAndSelectProduct(h *human.Config, page *rod.Page, modal *rod.Element,
 		return nil
 	}
 
-	if err := checkbox.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(checkbox); err != nil {
 		return errors.Wrap(err, "点击商品选择框失败")
 	}
 
@@ -1253,11 +1256,11 @@ func searchAndSelectProduct(h *human.Config, page *rod.Page, modal *rod.Element,
 }
 
 // clickModalSaveButton 点击保存按钮
-func clickModalSaveButton(page *rod.Page, modal *rod.Element) error {
+func clickModalSaveButton(h *human.Config, page *rod.Page, modal *rod.Element) error {
 	// 查找保存按钮（参考工作代码：直接查找并点击，不强制要求找到）
 	btn, err := modal.Element(".goods-selected-footer button")
 	if err == nil && btn != nil {
-		if err := btn.Click(proto.InputMouseButtonLeft, 1); err != nil {
+		if err := h.HumanClick(btn); err != nil {
 			slog.Warn("点击保存按钮失败", "error", err)
 		} else {
 			slog.Info("已点击保存按钮")
@@ -1268,7 +1271,7 @@ func clickModalSaveButton(page *rod.Page, modal *rod.Element) error {
 	// 尝试点击主按钮
 	primaryBtn, err := modal.Element(".goods-selected-footer .d-button--primary")
 	if err == nil && primaryBtn != nil {
-		if err := primaryBtn.Click(proto.InputMouseButtonLeft, 1); err != nil {
+		if err := h.HumanClick(primaryBtn); err != nil {
 			slog.Warn("点击主按钮失败", "error", err)
 		} else {
 			slog.Info("已点击主按钮")
