@@ -147,8 +147,8 @@ func (c *Config) HumanClick(elem *rod.Element) error {
 	}
 
 	// 中心点 + 随机偏移
-	offsetX := float64(-c.ClickOffset+rand.Intn(2*c.ClickOffset)) + (maxX-minX)*0.3
-	offsetY := float64(-c.ClickOffset+rand.Intn(2*c.ClickOffset)) + (maxY-minY)*0.3
+	offsetX := float64(rand.Intn(2*c.ClickOffset+1)-c.ClickOffset) + (maxX-minX)*0.3
+	offsetY := float64(rand.Intn(2*c.ClickOffset+1)-c.ClickOffset) + (maxY-minY)*0.3
 	x := minX + (maxX-minX)/2 + offsetX
 	y := minY + (maxY-minY)/2 + offsetY
 
