@@ -283,7 +283,7 @@ func submitPublish(page *rod.Page, title, content string, tags []string, schedul
 	if err != nil {
 		return errors.Wrap(err, "查找标题输入框失败")
 	}
-	if err := titleElem.Input(title); err != nil {
+	if err := h.HumanType(titleElem, title); err != nil {
 		return errors.Wrap(err, "输入标题失败")
 	}
 
@@ -300,7 +300,7 @@ func submitPublish(page *rod.Page, title, content string, tags []string, schedul
 	if !ok {
 		return errors.New("没有找到内容输入框")
 	}
-	if err := contentElem.Input(content); err != nil {
+	if err := h.HumanType(contentElem, content); err != nil {
 		return errors.Wrap(err, "输入正文失败")
 	}
 	if err := waitAndClickTitleInput(h, titleElem); err != nil {
