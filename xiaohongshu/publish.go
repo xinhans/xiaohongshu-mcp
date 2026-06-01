@@ -374,7 +374,7 @@ func clickPublishButton(h *human.Config, page *rod.Page) error {
 		return clickPublishWidget(h, page, btn.elem)
 	}
 
-	if err := btn.elem.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(btn.elem); err != nil {
 		return errors.Wrap(err, "点击发布按钮失败")
 	}
 	return nil
