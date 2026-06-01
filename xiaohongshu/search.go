@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/xpzouying/xiaohongshu-mcp/errors"
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 type SearchResult struct {
@@ -166,6 +167,7 @@ func NewSearchAction(page *rod.Page) *SearchAction {
 }
 
 func (s *SearchAction) Search(ctx context.Context, keyword string, filters ...FilterOption) ([]Feed, error) {
+	h := human.New()
 	page := s.page.Context(ctx)
 
 	searchURL := makeSearchURL(keyword)
@@ -205,7 +207,7 @@ func (s *SearchAction) Search(ctx context.Context, keyword string, filters ...Fi
 			selector := fmt.Sprintf(`div.filter-panel div.filters:nth-child(%d) div.tags:nth-child(%d)`,
 				filter.FiltersIndex, filter.TagsIndex)
 			option := page.MustElement(selector)
-			option.MustClick()
+			h.HumanClick(option)
 		}
 
 		// 等待页面更新

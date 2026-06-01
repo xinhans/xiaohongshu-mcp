@@ -58,9 +58,9 @@ func (a *interactAction) preparePage(ctx context.Context, actionType interactAct
 	return page
 }
 
-func (a *interactAction) performClick(page *rod.Page, selector string) {
+func (a *interactAction) performClick(h *human.Config, page *rod.Page, selector string) {
 	element := page.MustElement(selector)
-	element.MustClick()
+	h.HumanClick(element)
 }
 
 // LikeAction 负责处理点赞相关交互
@@ -111,7 +111,7 @@ func (a *LikeAction) perform(ctx context.Context, feedID, xsecToken string, targ
 func (a *LikeAction) toggleLike(page *rod.Page, feedID string, targetLiked bool, actionType interactActionType) error {
 	h := human.New()
 
-	a.performClick(page, SelectorLikeButton)
+	a.performClick(h, page, SelectorLikeButton)
 	h.Sleep()
 
 	liked, _, err := a.getInteractState(page, feedID)
@@ -125,7 +125,7 @@ func (a *LikeAction) toggleLike(page *rod.Page, feedID string, targetLiked bool,
 	}
 
 	logrus.Warnf("feed %s %s可能未成功，状态未变化，尝试再次点击", feedID, actionType)
-	a.performClick(page, SelectorLikeButton)
+	a.performClick(h, page, SelectorLikeButton)
 	h.Sleep()
 
 	liked, _, err = a.getInteractState(page, feedID)
@@ -189,7 +189,7 @@ func (a *FavoriteAction) perform(ctx context.Context, feedID, xsecToken string, 
 func (a *FavoriteAction) toggleFavorite(page *rod.Page, feedID string, targetCollected bool, actionType interactActionType) error {
 	h := human.New()
 
-	a.performClick(page, SelectorCollectButton)
+	a.performClick(h, page, SelectorCollectButton)
 	h.Sleep()
 
 	_, collected, err := a.getInteractState(page, feedID)
@@ -203,7 +203,7 @@ func (a *FavoriteAction) toggleFavorite(page *rod.Page, feedID string, targetCol
 	}
 
 	logrus.Warnf("feed %s %s可能未成功，状态未变化，尝试再次点击", feedID, actionType)
-	a.performClick(page, SelectorCollectButton)
+	a.performClick(h, page, SelectorCollectButton)
 	h.Sleep()
 
 	_, collected, err = a.getInteractState(page, feedID)

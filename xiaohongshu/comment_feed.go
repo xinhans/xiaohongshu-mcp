@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/proto"
 	"github.com/sirupsen/logrus"
 
 	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
@@ -48,7 +47,7 @@ func (f *CommentFeedAction) PostComment(ctx context.Context, feedID, xsecToken, 
 		return fmt.Errorf("未找到评论输入框，该帖子可能不支持评论或网页端不可访问: %w", err)
 	}
 
-	if err := elem.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(elem); err != nil {
 		logrus.Warnf("Failed to click comment input box: %v", err)
 		return fmt.Errorf("无法点击评论输入框: %w", err)
 	}
@@ -72,7 +71,7 @@ func (f *CommentFeedAction) PostComment(ctx context.Context, feedID, xsecToken, 
 		return fmt.Errorf("未找到提交按钮: %w", err)
 	}
 
-	if err := submitButton.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(submitButton); err != nil {
 		logrus.Warnf("Failed to click submit button: %v", err)
 		return fmt.Errorf("无法点击提交按钮: %w", err)
 	}
@@ -125,7 +124,7 @@ func (f *CommentFeedAction) ReplyToComment(ctx context.Context, feedID, xsecToke
 		return fmt.Errorf("无法找到回复按钮: %w", err)
 	}
 
-	if err := replyBtn.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(replyBtn); err != nil {
 		return fmt.Errorf("点击回复按钮失败: %w", err)
 	}
 
@@ -150,7 +149,7 @@ func (f *CommentFeedAction) ReplyToComment(ctx context.Context, feedID, xsecToke
 		return fmt.Errorf("无法找到提交按钮: %w", err)
 	}
 
-	if err := submitBtn.Click(proto.InputMouseButtonLeft, 1); err != nil {
+	if err := h.HumanClick(submitBtn); err != nil {
 		return fmt.Errorf("点击提交按钮失败: %w", err)
 	}
 

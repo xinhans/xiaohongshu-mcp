@@ -12,7 +12,6 @@ import (
 
 	"github.com/avast/retry-go/v4"
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/xpzouying/xiaohongshu-mcp/errors"
 	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
@@ -414,6 +413,7 @@ func shouldSkipButton(text string, threshold int, regex *regexp.Regexp) bool {
 
 func clickElementWithHumanBehavior(page *rod.Page, el *rod.Element, text string) bool {
 	var clickSuccess bool
+	h := human.New()
 
 	// 使用retry-go进行点击操作重试
 	err := retry.Do(
@@ -436,7 +436,7 @@ func clickElementWithHumanBehavior(page *rod.Page, el *rod.Element, text string)
 			}
 
 			// 点击
-			if err := el.Click(proto.InputMouseButtonLeft, 1); err != nil {
+			if err := h.HumanClick(el); err != nil {
 				return err // 返回错误以触发重试
 			}
 
