@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	myerrors "github.com/xpzouying/xiaohongshu-mcp/errors"
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 // ActionResult 通用动作响应（点赞/收藏等）
@@ -44,13 +45,15 @@ func newInteractAction(page *rod.Page) *interactAction {
 }
 
 func (a *interactAction) preparePage(ctx context.Context, actionType interactActionType, feedID, xsecToken string) *rod.Page {
+	h := human.New()
+
 	page := a.page.Context(ctx).Timeout(60 * time.Second)
 	url := makeFeedDetailURL(feedID, xsecToken)
 	logrus.Infof("Opening feed detail page for %s: %s", actionType, url)
 
 	page.MustNavigate(url)
 	page.MustWaitDOMStable()
-	time.Sleep(1 * time.Second)
+	h.Sleep()
 
 	return page
 }
@@ -106,8 +109,10 @@ func (a *LikeAction) perform(ctx context.Context, feedID, xsecToken string, targ
 }
 
 func (a *LikeAction) toggleLike(page *rod.Page, feedID string, targetLiked bool, actionType interactActionType) error {
+	h := human.New()
+
 	a.performClick(page, SelectorLikeButton)
-	time.Sleep(3 * time.Second)
+	h.Sleep()
 
 	liked, _, err := a.getInteractState(page, feedID)
 	if err != nil {
@@ -121,7 +126,7 @@ func (a *LikeAction) toggleLike(page *rod.Page, feedID string, targetLiked bool,
 
 	logrus.Warnf("feed %s %s可能未成功，状态未变化，尝试再次点击", feedID, actionType)
 	a.performClick(page, SelectorLikeButton)
-	time.Sleep(2 * time.Second)
+	h.Sleep()
 
 	liked, _, err = a.getInteractState(page, feedID)
 	if err != nil {
@@ -182,8 +187,10 @@ func (a *FavoriteAction) perform(ctx context.Context, feedID, xsecToken string, 
 }
 
 func (a *FavoriteAction) toggleFavorite(page *rod.Page, feedID string, targetCollected bool, actionType interactActionType) error {
+	h := human.New()
+
 	a.performClick(page, SelectorCollectButton)
-	time.Sleep(3 * time.Second)
+	h.Sleep()
 
 	_, collected, err := a.getInteractState(page, feedID)
 	if err != nil {
@@ -197,7 +204,7 @@ func (a *FavoriteAction) toggleFavorite(page *rod.Page, feedID string, targetCol
 
 	logrus.Warnf("feed %s %s可能未成功，状态未变化，尝试再次点击", feedID, actionType)
 	a.performClick(page, SelectorCollectButton)
-	time.Sleep(2 * time.Second)
+	h.Sleep()
 
 	_, collected, err = a.getInteractState(page, feedID)
 	if err != nil {
