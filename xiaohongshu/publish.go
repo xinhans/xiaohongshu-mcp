@@ -27,6 +27,7 @@ type PublishImageContent struct {
 	IsOriginal   bool       // 是否声明原创
 	Visibility   string     // 可见范围: "公开可见"(默认), "仅自己可见", "仅互关好友可见"
 	Products     []string   // 商品关键词列表，用于绑定带货商品
+	SaveAsDraft  bool       // 是否保存为草稿，true 则点击"暂存离开"
 }
 
 type PublishAction struct {
@@ -90,7 +91,7 @@ func (p *PublishAction) Publish(ctx context.Context, content PublishImageContent
 
 	logrus.Infof("发布内容: title=%s, images=%v, tags=%v, schedule=%v, original=%v, visibility=%s, products=%v", content.Title, len(content.ImagePaths), tags, content.ScheduleTime, content.IsOriginal, content.Visibility, content.Products)
 
-	if err := submitPublish(page, content.Title, content.Content, tags, content.ScheduleTime, content.IsOriginal, content.Visibility, content.Products); err != nil {
+	if err := submitPublish(page, content.Title, content.Content, tags, content.ScheduleTime, content.IsOriginal, content.Visibility, content.Products, content.SaveAsDraft); err != nil {
 		return errors.Wrap(err, "小红书发布失败")
 	}
 
@@ -279,7 +280,7 @@ func waitForUploadComplete(page *rod.Page, expectedCount int) error {
 	return errors.Errorf("第%d张图片上传超时(60s)，请检查网络连接和图片大小", expectedCount)
 }
 
-func submitPublish(page *rod.Page, title, content string, tags []string, scheduleTime *time.Time, isOriginal bool, visibility string, products []string) error {
+func submitPublish(page *rod.Page, title, content string, tags []string, scheduleTime *time.Time, isOriginal bool, visibility string, products []string, saveAsDraft bool) error {
 	h := human.New()
 	if level := os.Getenv("XHS_HUMAN_LEVEL"); level != "" {
 		h.SetAggression(level)
@@ -351,6 +352,15 @@ func submitPublish(page *rod.Page, title, content string, tags []string, schedul
 		return errors.Wrap(err, "绑定商品失败")
 	}
 
+	// 保存草稿或发布
+	if saveAsDraft {
+		if err := clickDraftButton(h, page); err != nil {
+			return errors.Wrap(err, "点击暂存离开按钮失败")
+		}
+		slog.Info("内容已保存到草稿箱")
+		return nil
+	}
+
 	if err := clickPublishButton(h, page); err != nil {
 		return err
 	}
@@ -376,6 +386,22 @@ func clickPublishButton(h *human.Config, page *rod.Page) error {
 
 	if err := h.HumanClick(btn.elem); err != nil {
 		return errors.Wrap(err, "点击发布按钮失败")
+	}
+	return nil
+}
+
+// clickDraftButton 点击"暂存离开"按钮
+func clickDraftButton(h *human.Config, page *rod.Page) error {
+	h.Sleep()
+
+	// 查找"暂存离开"按钮
+	draftBtn, err := page.Element("div.publish-page-publish-btn button.ce-btn.white")
+	if err != nil {
+		return errors.Wrap(err, "查找暂存离开按钮失败")
+	}
+
+	if err := h.HumanClick(draftBtn); err != nil {
+		return errors.Wrap(err, "点击暂存离开按钮失败")
 	}
 	return nil
 }
