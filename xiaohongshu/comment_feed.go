@@ -165,10 +165,11 @@ func findCommentElement(page *rod.Page, commentID, userID string) (*rod.Element,
 
 	const maxAttempts = 100
 	const scrollInterval = 800 * time.Millisecond
+	h := human.New()
 
 	// 先滚动到评论区
 	scrollToCommentsArea(page)
-	time.Sleep(1 * time.Second)
+	h.Sleep()
 
 	var lastCommentCount = 0
 	stagnantChecks := 0
@@ -221,7 +222,7 @@ func findCommentElement(page *rod.Page, commentID, userID string) (*rod.Element,
 			} else {
 				logrus.Warnf("未找到评论元素: %v", err)
 			}
-			time.Sleep(300 * time.Millisecond)
+			h.Sleep()
 		}
 
 		// === 5. 继续向下滚动 ===
@@ -230,7 +231,7 @@ func findCommentElement(page *rod.Page, commentID, userID string) (*rod.Element,
 		if err != nil {
 			logrus.Warnf("滚动失败: %v", err)
 		}
-		time.Sleep(500 * time.Millisecond)
+		h.Sleep()
 
 		// === 6. 滚动后立即查找（边滚动边查找）===
 		// 优先通过 commentID 查找（使用 Timeout 避免长时间等待）

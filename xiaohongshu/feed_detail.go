@@ -15,6 +15,7 @@ import (
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/xpzouying/xiaohongshu-mcp/errors"
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 // ========== 配置常量 ==========
@@ -536,6 +537,7 @@ func calculateScrollDelta(viewportHeight int, baseRatio float64) float64 {
 }
 
 func scrollToCommentsArea(page *rod.Page) {
+	h := human.New()
 	logrus.Info("滚动到评论区...")
 
 	// 先定位到评论区
@@ -543,7 +545,7 @@ func scrollToCommentsArea(page *rod.Page) {
 		el.MustScrollIntoView()
 	}
 	// 等待滚动完成
-	time.Sleep(500 * time.Millisecond)
+	h.Sleep()
 
 	// 触发一次小滚动，激活懒加载机制
 	smartScroll(page, 100)
@@ -754,7 +756,8 @@ func checkEndContainer(page *rod.Page) bool {
 // ========== 页面检查 ==========
 
 func checkPageAccessible(page *rod.Page) error {
-	time.Sleep(500 * time.Millisecond)
+	h := human.New()
+	h.Sleep()
 
 	// 查找错误提示容器
 	wrapperEl, err := page.Timeout(2 * time.Second).Element(".access-wrapper, .error-wrapper, .not-found-wrapper, .blocked-wrapper")

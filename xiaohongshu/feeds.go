@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/xpzouying/xiaohongshu-mcp/errors"
+	"github.com/xpzouying/xiaohongshu-mcp/pkg/human"
 )
 
 type FeedsListAction struct {
@@ -26,8 +27,9 @@ func NewFeedsListAction(page *rod.Page) *FeedsListAction {
 // GetFeedsList 获取页面的 Feed 列表数据
 func (f *FeedsListAction) GetFeedsList(ctx context.Context) ([]Feed, error) {
 	page := f.page.Context(ctx)
+	h := human.New()
 
-	time.Sleep(1 * time.Second)
+	h.Sleep()
 
 	result := page.MustEval(`() => {
 		if (window.__INITIAL_STATE__ &&
